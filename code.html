@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Document</title>
+</head>
+
+<body x-data="data()" x-init="loadEmployees()">
+  <div class="">
+    <a href="/test.html">Test</a>
+    <a href="/code.html" class="text-blue-400">Code</a>
+  </div>
+
+  <div class="flex flex-col items-center space-y-6 p-6">
+  <!-- Button -->
+  <button class="text-xl p-4 bg-slate-400 rounded" x-on:click="increment()">
+    <span x-text="count"></span>
+  </button>
+  <button x-on:click="modal"
+    class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    type="button">
+    Toggle modal
+  </button>
+  
+  <div class="flex gap-4">
+  <button class="text-sm p-4 bg-slate-400 rounded" x-on:click="findMinAge">
+    <span x-text="'Find minimum Age'"></span>
+  </button>
+  <button class="text-sm p-4 bg-slate-400 rounded" x-on:click="findMaxAge">
+    <span x-text="'Find maximum Age'"></span>
+  </button>
+  <button class="text-sm p-4 bg-slate-400 rounded" x-on:click="sortByMinAge">
+    <span x-text="'Sort minimum Age'"></span>
+  </button>
+  <button class="text-sm p-4 bg-slate-400 rounded" x-on:click="sortByMaxAge">
+    <span x-text="'Sort maximum Age'"></span>
+  </button>
+  <button class="text-sm p-4 bg-slate-400 rounded" x-on:click="loadEmployees">
+    <span x-text="'Sort by ID'"></span>
+  </button>
+  </div>
+
+
+  <!-- Employee List -->
+  <div class="relative overflow-x-auto">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-center">ID</th>
+        <th scope="col" class="px-6 py-3 text-center">Name</th>
+        <th scope="col" class="px-6 py-3 text-center">Age</th>
+        <th scope="col" class="px-6 py-3 text-center">Occupation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <template x-for="item in employees" :key="item.id">
+      <tr>
+          <td class="text-lg text-center" x-text="item.id"></td>
+          <td class="text-lg text-center" x-text="item.name"></td>
+          <td class="text-lg text-center" x-text="item.age"></td>
+          <td class="text-lg text-center" x-text="item.occupation"></td>
+        </tr>
+      </template>
+    </tbody>
+   </table>
+  </div>
+  </div>
+
+    <!-- Modal toggle -->
+    <div class="flex justify-center absolute" x-if="modal" x-show="modal">
+      <div class="p-8 bg-red-500 flex justify-between absolute">
+        <p>Test</p>
+        <p x-on:click="!modal">Close</p>
+      </div>
+    </div>
+
+
+  <script>
+    function data() {
+      return {
+        modal: false,
+        count: 0,
+        employees: [],
+        filteredEmployee: [],
+        loading: true,
+
+        minAge: false,
+        maxAge: false,
+        sortMin: false,
+        sortMax: false,
+        
+        increment() {
+          this.count++;
+          console.log(this.count);
+        },
+
+        findMinAge() {
+          const minAgePerson = this.employees.reduce((min, person) => person.age < min.age ? person : min);
+          alert(`Min Age: ${minAgePerson.name}, Age: ${minAgePerson.age}`);
+        },
+
+        findMaxAge() {
+          const maxAgePerson = this.employees.reduce((max, person) => person.age > max.age ? person : max);
+          alert(`Max Age: ${maxAgePerson.name}, Age: ${maxAgePerson.age}`);
+        },
+
+        sortByMinAge() {
+          this.employees = [...this.employees].sort((a, b) => a.age - b.age);
+        },
+
+        sortByMaxAge() {
+          this.employees = [...this.employees].sort((a, b) => b.age - a.age);
+        },
+
+        async loadEmployees() {
+          try{
+            const response = await fetch('./data.json')
+            if (!response.ok) {
+              throw new Error('Failed to fetch data'); 
+            }
+            this.employees = await response.json();
+
+            console.log(this.employees, 's')
+          } catch(err) {
+            this.error = err.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+        filteredPeople() {
+          // Return people who are older than or equal to the minimum age
+          return this.people.filter(person => person.age >= this.minAge);
+        },
+      };
+    }
+  </script>
+</body>
+
+</html>
